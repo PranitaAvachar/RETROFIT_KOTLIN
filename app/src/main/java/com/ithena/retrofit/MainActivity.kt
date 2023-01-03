@@ -4,7 +4,11 @@ package com.ithena.retrofit
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.util.Log.d
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.StringBuilder
@@ -12,13 +16,21 @@ import java.lang.StringBuilder
 
 const val BASE_URL="https://fakestoreapi.com/"
 class MainActivity : AppCompatActivity() {
-    lateinit var mytext: TextView
+
+    lateinit var myAdapter: MyAdapter
+    lateinit var linearLayoutManager: LinearLayoutManager
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-      mytext=findViewById(R.id.txtId)
+
+        recyclerview_product.setHasFixedSize(true)
+        linearLayoutManager = LinearLayoutManager(this)
+        recyclerview_product.layoutManager=linearLayoutManager
+
         getMyData()
     }
 
@@ -39,18 +51,14 @@ class MainActivity : AppCompatActivity() {
             ) {
                 val responseBody = response.body()!!
 
-                val myStringBuilder = StringBuilder()
-                for (myData in responseBody){
+                myAdapter = MyAdapter(baseContext, responseBody)
+                myAdapter.notifyDataSetChanged()
 
-                    myStringBuilder.append(myData.id)
-                    myStringBuilder.append("\n")
-                }
-                mytext.text=myStringBuilder
+                recyclerview_product.adapter = myAdapter
             }
 
-
             override fun onFailure(call: Call<List<MyProductClassItem>?>, t: Throwable) {
-             Log.d("MainActivity","onFailure:"+t.message)
+             d("MainActivity","onFailure:"+t.message)
             }
         })
     }
